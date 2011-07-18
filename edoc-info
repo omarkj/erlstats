@@ -1,0 +1,4 @@
+{application,erlstats}.
+{packages,[]}.
+{modules,[erlstats,erlstats_app,erlstats_ets,erlstats_sup,erlstats_utils,
+          gen_erlstats]}.
