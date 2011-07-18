@@ -1,13 +1,15 @@
 {application, erlstats,
  [
   {description, ""},
-  {vsn, "1"},
+  {vsn, "0.1.1"},
+  {modules, [erlstats,
+	     erlstats_app,
+	     erlstats_ets,
+	     erlstats_sup,
+	     erlstats_utils,
+	     gen_erlstats]},
   {registered, [erlstats,
-		erlstats_app,
-		erlstats_ets,
-		erlstats_sup,
-		erlstats_utils,
-		gen_erlstats]},
+		erlstats_sup]},
   {applications, [
                   kernel,
                   stdlib
