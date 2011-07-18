@@ -30,6 +30,7 @@ start_link() ->
 	    gen_server:start_link({local, ?SERVER}, ?MODULE, [], [])
     end.
 
+%% @doc Registers a new statistic of either type value or counter.
 -spec register_stat(StatName::atom(),
 		    StatType::value | counter) ->
 			   ok.
@@ -45,14 +46,16 @@ register_stat(StatName, Type) when Type =:= value;
 	    erlang:error(badarg, StatName)
     end.
 
+%% @doc Same as increment_stat(StatName, 1).
 -spec increment_stat(StatName::atom()) ->
-			    {NewCount::integer(), StatName::atom()}.
+			    NewCount::integer().
 increment_stat(StatName) ->
     increment_stat(StatName, 1).
 
+%% @doc Increments counter StatName by Count.
 -spec increment_stat(StatName::atom(),
 		     Count::integer()) ->
-			    {NewCount::integer(), StatName::atom()}.
+			    NewCount::integer().
 increment_stat(StatName, Count) ->
     Storage = ?STORAGE(),
     case Storage:increment_stat(StatName, Count) of
@@ -62,9 +65,10 @@ increment_stat(StatName, Count) ->
 	    NewCount
     end.
 
+%% @doc Updates a statistics to NewValue
 -spec update_stat(StatName::atom(),
 		  NewValue::any()) ->
-			 {NewValue::any(), StatName::any()}.
+			 NewValue::any().
 update_stat(StatName, NewValue) ->
     Storage = ?STORAGE(),
     case Storage:update_stat(StatName, NewValue) of
@@ -74,6 +78,7 @@ update_stat(StatName, NewValue) ->
 	    NewValue
     end.
 
+%% @doc Removes a statistics
 -spec destroy_stat(StatName::atom()) ->
 			  true.
 destroy_stat(StatName) ->
@@ -83,6 +88,30 @@ destroy_stat(StatName) ->
 	    true;
 	{reply, badarg} ->
 	    erlang:error(badarg)
+    end.
+
+%% @doc Returns a statistics
+-spec get_stat(StatName::atom()) ->
+		      Stat::any().			    
+get_stat(StatName) ->
+    Storage = ?STORAGE(),
+    case Storage:get_stat(StatName) of
+	{reply, badarg, StatName} ->
+	    erlang:error(badarg);
+	{reply, Stat} ->
+	    Stat
+    end.
+
+%% @doc Returns all statistics
+-spec get_all_stats() ->
+			   [any()].
+get_all_stats() ->
+    Storage = ?STORAGE(),
+    case Storage:get_all_stats() of
+	{reply, badarg} ->
+	    erlang:error(badarg);
+	{reply, Stats} ->
+	    Stats
     end.
 
 %% @hidden
@@ -117,21 +146,3 @@ code_change(_FromVsn, S, _Extra) ->
 terminate(_Reason, _State) ->
     ok.
 
-%% Internal methods
-get_stat(StatName) ->
-    Storage = ?STORAGE(),
-    case Storage:get_stat(StatName) of
-	{reply, badarg, StatName} ->
-	    erlang:error(badarg);
-	{reply, Stat} ->
-	    Stat
-    end.
-
-get_all_stats() ->
-    Storage = ?STORAGE(),
-    case Storage:get_all_stats() of
-	{reply, badarg} ->
-	    erlang:error(badarg);
-	{reply, Stats} ->
-	    Stats
-    end.
