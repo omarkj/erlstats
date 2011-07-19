@@ -5,6 +5,7 @@
 behaviour_info(callbacks) ->
     [{create_storage, 0},
      {register_stat, 2},
+     {reset_stat, 1},
      {increment_stat, 2},
      {update_stat, 2},
      {destroy_stat, 1},

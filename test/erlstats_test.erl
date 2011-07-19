@@ -16,7 +16,7 @@ t_insert_stats() ->
     ?assertEqual(test1, erlstats:update_stat(?STAT1, test1)),
     ?assertEqual(test2, erlstats:update_stat(?STAT1, test2)).
 
-t_destroy_stats() ->
+t_destroy_stat() ->
     ?assertEqual(true, erlstats:destroy_stat(?STAT1)),
     ?assertEqual(true, erlstats:destroy_stat(?STAT2)).
 
@@ -28,8 +28,33 @@ t_get_stat() ->
     ?assertEqual(15, erlstats:increment_stat(?STAT2, 15)),
     ?assertEqual(15, erlstats:get_stat(?STAT2)),
     ?assertEqual([{?STAT1, test1},
-		  {?STAT2, 15}], erlstats:get_all_stats()).
+		  {?STAT2, 15}], erlstats:get_all_stats()),
+    ?assertEqual(true, erlstats:destroy_stat(?STAT1)),
+    ?assertEqual(true, erlstats:destroy_stat(?STAT2)).
+    
+t_register_stats() ->
+    ?assertEqual([{?STAT1, true},
+		  {?STAT2, true}], erlstats:register_stats([{?STAT1, value},
+							    {?STAT2, counter}])).
+t_destroy_stats() ->
+    ?assertEqual([{?STAT1, true},
+		  {?STAT2, true}], erlstats:destroy_stats([?STAT1, ?STAT2])).
 
+t_reset_stat() ->
+    ?assertEqual([{?STAT1, true},
+		  {?STAT2, true}], erlstats:register_stats([{?STAT1, value},
+							    {?STAT2, counter}])),
+    ?assertEqual(test1, erlstats:update_stat(?STAT1, test1)),
+    ?assertEqual(15, erlstats:increment_stat(?STAT2, 15)),
+    ?assertEqual(true, erlstats:reset_stat(?STAT2)),
+    ?assertEqual(0, erlstats:get_stat(?STAT2)),
+    ?assertEqual(15, erlstats:increment_stat(?STAT2, 15)),
+    ?assertEqual([{?STAT1, true},
+		  {?STAT2, true}], erlstats:reset_stats([?STAT1, ?STAT2])),
+    ?assertEqual([{?STAT1, undefined},
+		  {?STAT2, 0}], erlstats:get_all_stats()).
+    
+    
 erlstats_test_() ->
     {setup,
      fun() ->
@@ -41,6 +66,9 @@ erlstats_test_() ->
      [
       {"register a stat", ?_test(t_register_stat())},
       {"insert a few stats", ?_test(t_insert_stats())},
-      {"destroy stats", ?_test(t_destroy_stats())},
-      {"get stats", ?_test(t_get_stat())}
+      {"destroy stats", ?_test(t_destroy_stat())},
+      {"get stats", ?_test(t_get_stat())},
+      {"register many stats", ?_test(t_register_stats())},
+      {"delete many stats", ?_test(t_destroy_stats())},
+      {"reset stat and stats", ?_test(t_reset_stat())}
      ]}.
